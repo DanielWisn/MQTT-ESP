@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"

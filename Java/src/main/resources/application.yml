@@ -1,0 +1,5 @@
+mqtt:
+  broker: tcp://localhost:1883
+  client-id: spring-backend-client
+  topic: temperature
+  qos: 1

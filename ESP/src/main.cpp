@@ -1,34 +1,99 @@
 #include <Arduino.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
 #define ONE_WIRE_BUS 4
 #define LED_PIN 2
 
-OneWire oneWire(ONE_WIRE_BUS);
+const char *ssid = "wifi-name";
+const char *password = "wifi-password";
+const char *mqtt_server = "mqtt-server-ip";
 
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
-void setup() {
-  Serial.begin(115200);
-  Serial.print("Device count: ");
-  Serial.println(sensors.getDeviceCount());
-  pinMode(LED_PIN, OUTPUT);
-  sensors.begin();
+void setup_wifi()
+{
+  delay(10);
+  Serial.println("Connecting to WiFi");
+
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\nWiFi connected");
 }
 
-void loop() {
-  sensors.requestTemperatures();
+void reconnect()
+{
+  while (!client.connected())
+  {
+    Serial.print("Connecting to MQTT...");
 
+    if (client.connect("ESP32_Temp"))
+    {
+      Serial.println("connected");
+    }
+    else
+    {
+      Serial.print("failed rc=");
+      Serial.println(client.state());
+      delay(2000);
+    }
+  }
+}
+
+void setup()
+{
+  Serial.begin(115200);
+
+  pinMode(LED_PIN, OUTPUT);
+
+  sensors.begin();
+
+  setup_wifi();
+
+  client.setServer(mqtt_server, 1883);
+}
+
+void loop()
+{
+
+  if (!client.connected())
+  {
+    reconnect();
+  }
+
+  client.loop();
+
+  sensors.requestTemperatures();
   float tempC = sensors.getTempCByIndex(0);
-  if (tempC < 15) {
+
+  if (tempC < 15)
+  {
     digitalWrite(LED_PIN, HIGH);
-  } else {
+  }
+  else
+  {
     digitalWrite(LED_PIN, LOW);
   }
+
   Serial.print("Temperature: ");
-  Serial.print(tempC);
-  Serial.println(" °C");
+  Serial.println(tempC);
+
+  char tempString[8];
+  dtostrf(tempC, 1, 2, tempString);
+
+  client.publish("temperature", tempString);
 
   delay(1000);
 }

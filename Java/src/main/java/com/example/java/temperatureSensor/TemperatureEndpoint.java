@@ -24,10 +24,11 @@ public class TemperatureEndpoint {
     }
 
     @GetMapping(path = "/history/{date}")
-    public Temperature getTemperature(@PathVariable LocalDateTime dateTime) {
-        return this.temperatureService.getTemperatureHistory(dateTime);
+    public Temperature getTemperature(@PathVariable LocalDateTime date) {
+        return this.temperatureService.getTemperatureHistory(date);
     }
 
+    //Work in progress
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamTemperature() {
         return temperatureService.subscribe();

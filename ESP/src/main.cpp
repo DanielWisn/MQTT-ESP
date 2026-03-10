@@ -7,9 +7,9 @@
 #define ONE_WIRE_BUS 4
 #define LED_PIN 2
 
-const char *ssid = "PLAY_Swiatlowodowy_5F95";
-const char *password = "Fh@7c&@dFrPN";
-const char *mqtt_server = "192.168.0.15";
+const char *ssid = "wifi-name";
+const char *password = "password";
+const char *mqtt_server = "mqqt-ip";
 
 WiFiClient espClient;
 PubSubClient client(espClient);

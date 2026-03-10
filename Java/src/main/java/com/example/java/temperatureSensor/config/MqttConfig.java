@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
@@ -15,6 +16,7 @@ import org.springframework.messaging.MessageHandler;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
 @Configuration
+@EnableIntegration
 public class MqttConfig {
     @Value("${mqtt.broker}")
     private String brokerUrl;
@@ -48,7 +50,7 @@ public class MqttConfig {
     }
 
     @Bean
-    public MqttPahoMessageDrivenChannelAdapter inboundAdapter(MqttPahoClientFactory factory, MessageChannel mqttInputChannel) {
+    public MqttPahoMessageDrivenChannelAdapter inboundAdapter(MqttPahoClientFactory factory) {
 
         MqttPahoMessageDrivenChannelAdapter adapter =
                 new MqttPahoMessageDrivenChannelAdapter(clientId, factory, topic);
@@ -56,7 +58,8 @@ public class MqttConfig {
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(qos);
-        adapter.setOutputChannel(mqttInputChannel);
+        adapter.setOutputChannel(mqttInputChannel());
+        adapter.setAutoStartup(true);
 
         return adapter;
     }
@@ -66,6 +69,7 @@ public class MqttConfig {
     public MessageHandler mqttMessageHandler(MqttService mqttService) {
         return message -> {
             String payload = message.getPayload().toString();
+            System.out.println("MQTT message received: " + payload);
             mqttService.handleMessage(payload);
         };
     }

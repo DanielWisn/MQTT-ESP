@@ -7,9 +7,9 @@
 #define ONE_WIRE_BUS 4
 #define LED_PIN 2
 
-const char *ssid = "wifi-name";
-const char *password = "wifi-password";
-const char *mqtt_server = "mqtt-server-ip";
+const char *ssid = "PLAY_Swiatlowodowy_5F95";
+const char *password = "Fh@7c&@dFrPN";
+const char *mqtt_server = "192.168.0.15";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -22,6 +22,7 @@ void setup_wifi()
   delay(10);
   Serial.println("Connecting to WiFi");
 
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED)
@@ -37,8 +38,11 @@ void reconnect()
 {
   while (!client.connected())
   {
-    Serial.print("Connecting to MQTT...");
-
+    Serial.println("Connecting to MQTT...");
+    Serial.print("WiFi IP: ");
+    Serial.println(WiFi.localIP());
+    Serial.print("MQTT state: ");
+    Serial.println(client.state());
     if (client.connect("ESP32_Temp"))
     {
       Serial.println("connected");
@@ -62,7 +66,7 @@ void setup()
 
   setup_wifi();
 
-  client.setServer(mqtt_server, 1883);
+  client.setServer(mqtt_server, 1884);
 }
 
 void loop()

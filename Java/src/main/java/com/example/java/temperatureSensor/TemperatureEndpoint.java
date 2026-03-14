@@ -12,10 +12,12 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/temperature")
 public class TemperatureEndpoint {
+    private final SseService sseService;
     private TemperatureService temperatureService;
 
-    public TemperatureEndpoint(TemperatureService temperatureService) {
+    public TemperatureEndpoint(TemperatureService temperatureService, SseService sseService) {
         this.temperatureService = temperatureService;
+        this.sseService = sseService;
     }
 
     @GetMapping(path = "/latest")
@@ -28,9 +30,8 @@ public class TemperatureEndpoint {
         return this.temperatureService.getTemperatureHistory(date);
     }
 
-    //Work in progress
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamTemperature() {
-        return temperatureService.subscribe();
+        return sseService.subscribe();
     }
 }
